@@ -12,6 +12,7 @@ import (
 func main() {
 
 	debug := flag.Bool("debug", false, "launch provider in debug mode")
+	flag.Parse()
 
 	opts := &plugin.ServeOpts{
 		ProviderFunc: func() *schema.Provider {
@@ -20,7 +21,7 @@ func main() {
 	}
 
 	if *debug {
-		err := plugin.Debug(context.Background(), "github.com/pixxle/terraform-provider-request", opts)
+		err := plugin.Debug(context.Background(), "github.com/Pixxle/request", opts)
 		if err != nil {
 			log.Fatal(err.Error())
 		}

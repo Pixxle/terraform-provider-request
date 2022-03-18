@@ -2,7 +2,10 @@ module github.com/Pixxle/terraform-provider-request
 
 go 1.17
 
-require github.com/hashicorp/terraform-plugin-sdk/v2 v2.10.1
+require (
+	github.com/davecgh/go-spew v1.1.1
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.10.1
+)
 
 require (
 	github.com/agext/levenshtein v1.2.2 // indirect

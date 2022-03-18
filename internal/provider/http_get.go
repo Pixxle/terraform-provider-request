@@ -2,13 +2,16 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"github.com/Pixxle/terraform-provider-request/internal/pkg/constants"
+	"github.com/Pixxle/terraform-provider-request/internal/pkg/entity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func httpGet() *schema.Resource {
 	return &schema.Resource{
+		ReadContext: dataSourceHTTPRead,
 		Schema: map[string]*schema.Schema{
 			constants.URL: {
 				Type:     schema.TypeString,
@@ -37,10 +40,14 @@ func httpGet() *schema.Resource {
 		}}
 }
 
-func dataSourceHTTPRead(ctx context.Context, d *schema.ResourceData, meta interface{}) (diags diag.Diagnostic) {
-	url := d.Get(constants.URL).(string)
-	headers := d.Get(constants.REQUEST_HEADERS).(map[string]interface{})
-	query_parameters := d.Get(constants.QUERY_PARAMETERS).(map[string]interface{})
-	aws_profile := d.Get(constants.AWS_PROFILE).(map[string]interface{})
-	sigv4_signed := d.Get(constants.SIGV4_SIGNED).(bool)
+func dataSourceHTTPRead(ctx context.Context, d *schema.ResourceData, meta interface{}) (diags diag.Diagnostics) {
+	_, err := entity.NewHTTP(d)
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  fmt.Sprintf("Generate HTTP Request failed due to %s", err.Error()),
+		})
+		return
+	}
+	return
 }
