@@ -9,9 +9,14 @@ terraform {
 
 provider "terraform-provider-request" {}
 
-resource "request_myhttp" "basic-http-example" {
+data "myhttp" "basic-http-example" {
+  provider = terraform-provider-request
+
   url = "https://"
   request_headers = {
     content-type = "text/plain"
+  }
+  query_parameters = {
+    hello = world
   }
 }
