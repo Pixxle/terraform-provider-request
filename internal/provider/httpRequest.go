@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/Pixxle/terraform-provider-request/internal/connection"
 	"github.com/Pixxle/terraform-provider-request/internal/constants"
@@ -9,17 +10,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"strings"
 )
 
 func httpRequest() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceHTTPRequest,
-		/*CreateContext: dataSourceHTTPRequest,
-		UpdateContext: dataSourceHTTPRequest,
-		DeleteContext: dataSourceDelete,
-		*/
 		Schema: map[string]*schema.Schema{
 			constants.HTTP_METHOD: {
 				Type:         schema.TypeString,
@@ -69,6 +66,10 @@ func httpRequest() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			constants.JSON_BODY: {
+				Type:     schema.TypeMap,
+				Computed: true,
+			},
 			constants.RESPONSE_CODE: {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -92,27 +93,41 @@ func dataSourceHTTPRequest(ctx context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Error while sending HTTP connection",
+			Summary:  "Error while sending HTTP(S) Request",
 			Detail:   err.Error(),
 		})
+		return diags
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Error while reading HTTP(S) response body",
+			Detail:   err.Error(),
+		})
+		return diags
 	}
 	defer res.Body.Close()
 	i, _ := uuid.GenerateUUID()
 	d.SetId(i)
-	err = d.Set(constants.BODY, fmt.Sprintf("%s", body))
-	err = d.Set(constants.RESPONSE_CODE, res.StatusCode)
 
-	return
-}
+	d.Set(constants.BODY, fmt.Sprintf("%s", body))
+	d.Set(constants.RESPONSE_CODE, res.StatusCode)
 
-func dataSourceDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) (diags diag.Diagnostics) {
-	d.SetId("")
-	d.Set(constants.BODY, "")
-	d.Set(constants.RESPONSE_CODE, "")
+	if strings.Contains(res.Header.Get(constants.CONTENT_TYPE), constants.APPLICATION_JSON) {
+		var i interface{}
+		err = json.Unmarshal(body, &i)
+		if err != nil {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Error while unmarshalling JSON response body",
+				Detail:   err.Error(),
+			})
+			return diags
+		}
+		d.Set(constants.JSON_BODY, i)
+	}
+
 	return
 }

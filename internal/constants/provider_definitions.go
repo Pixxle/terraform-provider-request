@@ -11,5 +11,8 @@ const (
 	HTTP_METHOD      = "http_method"
 	BODY_CONTENT     = "body_content"
 	BODY             = "body"
+	JSON_BODY        = "json_body"
 	RESPONSE_CODE    = "response_code"
+	CONTENT_TYPE     = "Content-Type"
+	APPLICATION_JSON = "application/json"
 )
