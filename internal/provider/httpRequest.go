@@ -2,15 +2,14 @@ package provider
 
 import (
 	"context"
-	"github.com/Pixxle/terraform-provider-request/internal/pkg/constants"
-	"github.com/Pixxle/terraform-provider-request/internal/pkg/request"
-	"github.com/Pixxle/terraform-provider-request/internal/pkg/validate"
+	"github.com/Pixxle/terraform-provider-request/internal/connection"
+	"github.com/Pixxle/terraform-provider-request/internal/constants"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"net/http"
 )
 
-func httpGet() *schema.Resource {
+func httpRequest() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceHTTPRequest,
 		Schema: map[string]*schema.Schema{
@@ -18,7 +17,7 @@ func httpGet() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      http.MethodGet,
-				ValidateFunc: validate.HttpMethod,
+				ValidateFunc: ValidateHTTPMethod,
 			},
 			constants.URL: {
 				Type:     schema.TypeString,
@@ -61,7 +60,7 @@ func httpGet() *schema.Resource {
 }
 
 func dataSourceHTTPRequest(ctx context.Context, d *schema.ResourceData, meta interface{}) (diags diag.Diagnostics) {
-	request, err := request.NewHTTP(d)
+	request, err := connection.NewHTTP(d)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -76,7 +75,7 @@ func dataSourceHTTPRequest(ctx context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Error while sending HTTP request",
+			Summary:  "Error while sending HTTP connection",
 			Detail:   err.Error(),
 		})
 	}

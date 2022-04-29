@@ -2,8 +2,8 @@ package request
 
 import (
 	"fmt"
-	"github.com/Pixxle/terraform-provider-request/internal/pkg/constants"
-	"github.com/Pixxle/terraform-provider-request/internal/pkg/utility"
+	"github.com/Pixxle/terraform-provider-request/internal/constants"
+	"github.com/Pixxle/terraform-provider-request/internal/utility"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"io"
 	"net/http"
