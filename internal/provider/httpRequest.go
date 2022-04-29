@@ -2,16 +2,24 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"github.com/Pixxle/terraform-provider-request/internal/connection"
 	"github.com/Pixxle/terraform-provider-request/internal/constants"
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"io/ioutil"
+	"log"
 	"net/http"
 )
 
 func httpRequest() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceHTTPRequest,
+		/*CreateContext: dataSourceHTTPRequest,
+		UpdateContext: dataSourceHTTPRequest,
+		DeleteContext: dataSourceDelete,
+		*/
 		Schema: map[string]*schema.Schema{
 			constants.HTTP_METHOD: {
 				Type:         schema.TypeString,
@@ -56,6 +64,15 @@ func httpRequest() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+
+			constants.BODY: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			constants.RESPONSE_CODE: {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 		}}
 }
 
@@ -71,7 +88,7 @@ func dataSourceHTTPRequest(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	client := http.Client{}
-	_, err = client.Do(request)
+	res, err := client.Do(request)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -80,5 +97,22 @@ func dataSourceHTTPRequest(ctx context.Context, d *schema.ResourceData, meta int
 		})
 	}
 
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer res.Body.Close()
+	i, _ := uuid.GenerateUUID()
+	d.SetId(i)
+	err = d.Set(constants.BODY, fmt.Sprintf("%s", body))
+	err = d.Set(constants.RESPONSE_CODE, res.StatusCode)
+
+	return
+}
+
+func dataSourceDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) (diags diag.Diagnostics) {
+	d.SetId("")
+	d.Set(constants.BODY, "")
+	d.Set(constants.RESPONSE_CODE, "")
 	return
 }

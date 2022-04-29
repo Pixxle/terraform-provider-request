@@ -19,7 +19,7 @@ func SigV4SignRequest(r *http.Request, awsProfile, region, sigV4Service string) 
 
 	payload, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return fmt.Errorf("unable to read body of request %v", err)
+		return fmt.Errorf("unable to read body of connection %w", err)
 	}
 	r.Body = ioutil.NopCloser(bytes.NewReader(payload))
 
@@ -34,17 +34,17 @@ func SigV4SignRequest(r *http.Request, awsProfile, region, sigV4Service string) 
 		cfg, err = config.LoadDefaultConfig(context.Background(), config.WithSharedConfigProfile(awsProfile))
 	}
 	if err != nil {
-		return fmt.Errorf("failed to generate aws sigv4 signed request %v", err)
+		return fmt.Errorf("failed to generate aws sigv4 signed connection %w", err)
 	}
 
-	creds, err := cfg.Credentials.Retrieve(context.Background())
+	credentials, err := cfg.Credentials.Retrieve(context.Background())
 	if err != nil {
-		return fmt.Errorf("failed to retreive aws credentials while generating aws sigv4 signed request %v", err)
+		return fmt.Errorf("failed to retreive aws credentials while generating aws sigv4 signed connection %w", err)
 	}
 
-	err = signer.SignHTTP(context.Background(), creds, r, hash, sigV4Service, region, time.Now())
+	err = signer.SignHTTP(context.Background(), credentials, r, hash, sigV4Service, region, time.Now())
 	if err != nil {
-		return fmt.Errorf("failed to sign aws sigv4 request %v", err)
+		return fmt.Errorf("failed to sign aws sigv4 connection %w", err)
 	}
 
 	return nil

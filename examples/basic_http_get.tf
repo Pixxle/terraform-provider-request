@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     terraform-provider-request = {
-      source = "github.com/Pixxle/request"
+      source = "github.com/Pixxle/httpRequest"
       version = "0.0.1"
     }
   }
@@ -9,7 +9,7 @@ terraform {
 
 provider "terraform-provider-request" {}
 
-data "myhttp" "basic-http-example" {
+data "httpRequest" "basic-http-example" {
   provider = terraform-provider-request
 
   url = "https://"
@@ -17,6 +17,6 @@ data "myhttp" "basic-http-example" {
     content-type = "text/plain"
   }
   query_parameters = {
-    hello = world
+    hello = "world"
   }
 }

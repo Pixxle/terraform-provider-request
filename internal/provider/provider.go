@@ -6,7 +6,7 @@ func New() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{},
 		DataSourcesMap: map[string]*schema.Resource{
-			"myhttp": httpGet(),
+			"httpRequest": httpRequest(),
 		},
 		ResourcesMap: map[string]*schema.Resource{},
 	}

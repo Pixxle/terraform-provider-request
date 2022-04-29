@@ -21,7 +21,7 @@ func main() {
 	}
 
 	if *debug {
-		err := plugin.Debug(context.Background(), "github.com/Pixxle/request", opts)
+		err := plugin.Debug(context.Background(), "github.com/Pixxle/httpRequest", opts)
 		if err != nil {
 			log.Fatal(err.Error())
 		}

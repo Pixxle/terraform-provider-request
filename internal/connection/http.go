@@ -1,4 +1,4 @@
-package request
+package connection
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ func NewHTTP(d *schema.ResourceData) (*http.Request, error) {
 
 	request, err := http.NewRequest(httpMethod, url, bcR)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate http request %v", err)
+		return nil, fmt.Errorf("failed to generate http connection %w", err)
 	}
 
 	headers := d.Get(constants.REQUEST_HEADERS).(map[string]interface{})
