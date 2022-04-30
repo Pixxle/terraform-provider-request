@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/Pixxle/terraform-provider-request/internal/connection"
 	"github.com/Pixxle/terraform-provider-request/internal/constants"
 	"github.com/hashicorp/go-uuid"
@@ -61,12 +60,7 @@ func httpRequest() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			constants.BODY: {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			constants.JSON_BODY: {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
@@ -112,9 +106,7 @@ func dataSourceHTTPRequest(ctx context.Context, d *schema.ResourceData, meta int
 	i, _ := uuid.GenerateUUID()
 	d.SetId(i)
 
-	d.Set(constants.BODY, fmt.Sprintf("%s", body))
 	d.Set(constants.RESPONSE_CODE, res.StatusCode)
-
 	if strings.Contains(res.Header.Get(constants.CONTENT_TYPE), constants.APPLICATION_JSON) {
 		var i interface{}
 		err = json.Unmarshal(body, &i)
@@ -126,7 +118,13 @@ func dataSourceHTTPRequest(ctx context.Context, d *schema.ResourceData, meta int
 			})
 			return diags
 		}
-		d.Set(constants.JSON_BODY, i)
+		d.Set(constants.BODY, i)
+	} else {
+		d.Set(constants.BODY, &struct {
+			Value string
+		}{
+			Value: string(body),
+		})
 	}
 
 	return

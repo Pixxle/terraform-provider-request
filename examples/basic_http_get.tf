@@ -22,7 +22,8 @@ data "httpRequest" "basic-http-example" {
 }
 
 // If the response from http request has the content-type header set to application/json the structure gets unmarshalled
-// and is available for use in the json_body computed field of the httpRequest datasource.
+// and is available for use in the body computed field of the httpRequest datasource. In all other cases the terraform
+// provider publishes the http response body in the body.value field.
 output "myJsonOutput" {
-  value = data.httpRequest.basic-http-example.json_body.about
+  value = data.httpRequest.basic-http-example.body.about
 }
